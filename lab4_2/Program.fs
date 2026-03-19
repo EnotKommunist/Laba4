@@ -1,4 +1,4 @@
-﻿open System
+open System
 
 type Tree =
     | Empty
@@ -22,35 +22,28 @@ let buildTreeFromList (values: int list) =
         | head :: tail -> build tail (insertIntoTree head acc)
     build values Empty
 
-// Функция для проверки, является ли узел листом
-let isLeaf node =
-    match node with
-    | Empty -> false
-    | Node(_, left, right) -> left = Empty && right = Empty
-
-// Функция для подсчета суммы четных значений в листьях
-let rec sumEvenInLeaves tree =
+let rec fold f acc tree =
     match tree with
-    | Empty -> 0
-    | Node(value, left, right) ->
-        let sumFromChildren = sumEvenInLeaves left + sumEvenInLeaves right
-        // Проверяем, является ли текущий узел листом и четно ли его значение
-        if isLeaf (Node(value, left, right)) && value % 2 = 0 then
-            value + sumFromChildren
-        else
-            sumFromChildren
+    | Empty -> acc
+    | Node(v, left, right) ->
+        let acc1 = fold f acc left
+        let acc2 = f acc1 v left right
+        fold f acc2 right
 
-// Функция для вывода дерева
+let folder acc value left right =
+        if left = Empty && right = Empty && value % 2 = 0 then
+            acc + value
+        else
+            acc
+
 let rec printTree indent tree =
     match tree with
     | Empty -> printfn "%sEmpty" indent
     | Node(value, left, right) ->
-        // Добавляем пометку для листьев
         printfn "%sNode(%d)" indent value
         printTree (indent + "  ") left
         printTree (indent + "  ") right
 
-// Функция для чтения целого числа
 let readInt prompt =
     let rec loop () =
         printf "%s" prompt
@@ -67,24 +60,18 @@ let generateRandomNumbers count =
     printfn "\nГенерируем %d случайных чисел от 1 до 100" count
     
     [ for i in 1..count -> 
-        let number = rnd.Next(1, 101)  // генерация от 1 до 100
+        let number = rnd.Next(1, 101)
         printf "%d " number
         number ]
-    |> fun numbers -> printfn ""; numbers
 
 [<EntryPoint>]
 let main argv =    
     printfn "=== ПОИСК СУММЫ ЧЕТНЫХ ЧИСЕЛ В ЛИСТЬЯХ ДЕРЕВА ==="
-    // Запрашиваем количество элементов
     let count = readInt "Введите количество элементов в дереве: "
-    // Генерируем случайные числа
     let numbers = generateRandomNumbers count
-    // Построение дерева
     let tree = buildTreeFromList numbers
-    // Вывод дерева
     printfn "\nПостроенное дерево:"
     printTree "" tree
-    // Подсчет суммы четных чисел в листьях
-    let sum = sumEvenInLeaves tree
+    let sum = fold folder 0 tree
     printfn "Сумма четных значений в листьях: %d" sum    
     0
