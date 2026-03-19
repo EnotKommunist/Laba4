@@ -85,8 +85,6 @@ let generateRandomStrings count =
 
 [<EntryPoint>]
 let main argv =
-    Console.OutputEncoding <- System.Text.Encoding.UTF8
-    
     printfn "=== СОЗДАНИЕ БИНАРНОГО ДЕРЕВА ==="
     
     // Запрашиваем только количество элементов
